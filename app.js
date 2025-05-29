@@ -128,25 +128,60 @@ function update() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+// thrust the ship
+    if (ship.thrusting) {
+        ship.thrust.x += (SHIP_THRUST * Math.cos(ship.ang)) / FPS;
+        ship.thrust.y -= (SHIP_THRUST * Math.sin(ship.ang)) / FPS;
+
+        // draw the thruster
+            if (!exploding) {
+            ctx.fillStyle = 'red';
+            ctx.strokeStyle = 'yellow';
+            ctx.lineWidth = SHIP_SIZE * 0.1;
+            ctx.beginPath();
+            ctx.moveTo(
+                // rear left
+                ship.x - ship.rad * (2/3 * Math.cos(ship.ang) + 0.65 * Math.sin(ship.ang)),
+                ship.y + ship.rad * (2/3 * Math.sin(ship.ang) - 0.65 * Math.cos(ship.ang))
+            );
+            ctx.lineTo(
+                // rear center
+                ship.x - ship.rad * 2 * Math.cos(ship.ang),
+                ship.y + ship.rad * 2 * Math.sin(ship.ang)
+            );
+            ctx.lineTo(
+                // rear right
+                ship.x - ship.rad * (2/3 * Math.cos(ship.ang) - .65 * Math.sin(ship.ang)),
+                ship.y + ship.rad * (2/3 * Math.sin(ship.ang) + .65 * Math.cos(ship.ang))
+            );
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+    } else {
+        ship.thrust.x -= (FRICTION * ship.thrust.x) / FPS;
+        ship.thrust.y -= (FRICTION * ship.thrust.y) / FPS;
+    }
+
     // draw ship
     if (!exploding) {
         ctx.strokeStyle = 'white';
-    ctx.lineWidth = SHIP_SIZE * 0.10;
-    ctx.beginPath();
-    ctx.moveTo( // nose of ship
-        ship.x + 6/4 * ship.rad * Math.cos(ship.ang),
-        ship.y - 6/4 * ship.rad * Math.sin(ship.ang)
-    );
-    ctx.lineTo( // rear left
-        ship.x - ship.rad * (2/3 * Math.cos(ship.ang) + Math.sin(ship.ang)),
-        ship.y + ship.rad * (2/3 * Math.sin(ship.ang) - Math.cos(ship.ang))
-    );
-    ctx.lineTo( // rear right
-        ship.x - ship.rad * (2/3 * Math.cos(ship.ang) - Math.sin(ship.ang)),
-        ship.y + ship.rad * (2/3 * Math.sin(ship.ang) + Math.cos(ship.ang))
-    );
-    ctx.closePath();
-    ctx.stroke();
+        ctx.lineWidth = SHIP_SIZE * 0.10;
+        ctx.beginPath();
+        ctx.moveTo( // nose of ship
+            ship.x + 6/4 * ship.rad * Math.cos(ship.ang),
+            ship.y - 6/4 * ship.rad * Math.sin(ship.ang)
+        );
+        ctx.lineTo( // rear left
+            ship.x - ship.rad * (2/3 * Math.cos(ship.ang) + Math.sin(ship.ang)),
+            ship.y + ship.rad * (2/3 * Math.sin(ship.ang) - Math.cos(ship.ang))
+        );
+        ctx.lineTo( // rear right
+            ship.x - ship.rad * (2/3 * Math.cos(ship.ang) - Math.sin(ship.ang)),
+            ship.y + ship.rad * (2/3 * Math.sin(ship.ang) + Math.cos(ship.ang))
+        );
+        ctx.closePath();
+        ctx.stroke();
     } else {
         // draw the explosion
         ctx.fillStyle = 'darkred';
@@ -265,41 +300,6 @@ function update() {
         if (ship.explodeTime === 0) {
             ship = newShip();
         }
-    }
-
-    // thrust the ship
-    if (ship.thrusting) {
-        ship.thrust.x += (SHIP_THRUST * Math.cos(ship.ang)) / FPS;
-        ship.thrust.y -= (SHIP_THRUST * Math.sin(ship.ang)) / FPS;
-
-        // draw the thruster
-            if (!exploding) {
-            ctx.fillStyle = 'red';
-            ctx.strokeStyle = 'yellow';
-            ctx.lineWidth = SHIP_SIZE * 0.1;
-            ctx.beginPath();
-            ctx.moveTo(
-                // rear left
-                ship.x - ship.rad * (2/3 * Math.cos(ship.ang) + 0.65 * Math.sin(ship.ang)),
-                ship.y + ship.rad * (2/3 * Math.sin(ship.ang) - 0.65 * Math.cos(ship.ang))
-            );
-            ctx.lineTo(
-                // rear center
-                ship.x - ship.rad * 6/3 * Math.cos(ship.ang),
-                ship.y + ship.rad * 6/3 * Math.sin(ship.ang)
-            );
-            ctx.lineTo(
-                // rear right
-                ship.x - ship.rad * (2/3 * Math.cos(ship.ang) - 0.65 * Math.sin(ship.ang)),
-                ship.y + ship.rad * (2/3 * Math.sin(ship.ang) + 0.65 * Math.cos(ship.ang))
-            );
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-        }
-    } else {
-        ship.thrust.x -= (FRICTION * ship.thrust.x) / FPS;
-        ship.thrust.y -= (FRICTION * ship.thrust.y) / FPS;
     }
 
     // handle edge of screen
