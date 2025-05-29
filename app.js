@@ -13,8 +13,8 @@ const SHOW_BOUNDING = false; // show or hide collision bounding
 const SHOW_CENTER_DOT = false; // show or hide ship's center dot
 
 /** @type {HTMLCanvasElement} */
-const canvas = document.getElementById("game-canvas");
-const ctx = canvas.getContext("2d");
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
 
 // create space ship
 let ship = newShip();
@@ -32,8 +32,7 @@ function createAsteroidBelt() {
             x = Math.floor(Math.random() * canvas.width);
             y = Math.floor(Math.random() * canvas.height);
         } while (
-            distBetweenPoints(ship.x, ship.y, x, y) <
-            ROIDS_SIZE * 2 + ship.rad
+            distBetweenPoints(ship.x, ship.y, x, y) < ROIDS_SIZE * 2 + ship.rad
         );
         roids.push(newAsteroid(x, y));
     }
@@ -43,12 +42,8 @@ function newAsteroid(x, y) {
     let roid = {
         x: x,
         y: y,
-        xVelocity:
-            ((Math.random() * ROIDS_SPEED) / FPS) *
-            (Math.random() < 0.5 ? 1 : -1),
-        yVelocity:
-            ((Math.random() * ROIDS_SPEED) / FPS) *
-            (Math.random() < 0.5 ? 1 : -1),
+        xVelocity: Math.random() * ROIDS_SPEED / FPS * (Math.random() < 0.5 ? 1 : -1),
+        yVelocity: Math.random() * ROIDS_SPEED / FPS * (Math.random() < 0.5 ? 1 : -1),
         rad: ROIDS_SIZE / 2,
         ang: Math.random() * Math.PI * 2,
         vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT / 2),
@@ -89,36 +84,36 @@ function explodeShip() {
 }
 
 // set up event handlers
-document.addEventListener("keydown", keyDown);
-document.addEventListener("keyup", keyUp);
+document.addEventListener('keydown', keyDown);
+document.addEventListener('keyup', keyUp);
 
 function keyDown(/** @type {KeyboardEvent} */ ev) {
     switch (ev.key) {
-        case "ArrowLeft":
+        case 'ArrowLeft':
             ship.rot = ((TURN_SPEED / 180) * Math.PI) / FPS;
             break;
-        case "ArrowUp":
+        case 'ArrowUp':
             ship.thrusting = true;
             break;
-        case "ArrowRight":
+        case 'ArrowRight':
             ship.rot = ((-TURN_SPEED / 180) * Math.PI) / FPS;
             break;
-        case "ArrowDown":
+        case 'ArrowDown':
             break;
     }
 }
 function keyUp(/** @type {KeyboardEvent} */ ev) {
     switch (ev.key) {
-        case "ArrowLeft":
+        case 'ArrowLeft':
             ship.rot = 0;
             break;
-        case "ArrowUp":
+        case 'ArrowUp':
             ship.thrusting = false;
             break;
-        case "ArrowRight":
+        case 'ArrowRight':
             ship.rot = 0;
             break;
-        case "ArrowDown":
+        case 'ArrowDown':
             break;
     }
 }
@@ -130,12 +125,12 @@ function update() {
     let exploding = ship.explodeTime > 0;
 
     // draw space
-    ctx.fillStyle = "black";
+    ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // draw ship
     if (!exploding) {
-        ctx.strokeStyle = "white";
+        ctx.strokeStyle = 'white';
         ctx.lineWidth = SHIP_SIZE * 0.1;
         ctx.beginPath();
         ctx.moveTo(
@@ -145,43 +140,39 @@ function update() {
         );
         ctx.lineTo(
             // rear left
-            ship.x -
-                ship.rad * ((2 / 3) * Math.cos(ship.ang) + Math.sin(ship.ang)),
-            ship.y +
-                ship.rad * ((2 / 3) * Math.sin(ship.ang) - Math.cos(ship.ang))
+            ship.x - ship.rad * (2 / 3) * Math.cos(ship.ang) + Math.sin(ship.ang),
+            ship.y + ship.rad * (2 / 3) * Math.sin(ship.ang) - Math.cos(ship.ang)
         );
         ctx.lineTo(
             // rear right
-            ship.x -
-                ship.rad * ((2 / 3) * Math.cos(ship.ang) - Math.sin(ship.ang)),
-            ship.y +
-                ship.rad * ((2 / 3) * Math.sin(ship.ang) + Math.cos(ship.ang))
+            ship.x - ship.rad * (2 / 3) * Math.cos(ship.ang) - Math.sin(ship.ang),
+            ship.y + ship.rad * (2 / 3) * Math.sin(ship.ang) + Math.cos(ship.ang)
         );
         ctx.closePath();
         ctx.stroke();
     } else {
         // draw the explosion
-        ctx.fillStyle = "darkred";
+        ctx.fillStyle = 'darkred';
         ctx.beginPath();
         ctx.arc(ship.x, ship.y, ship.rad * 1.7, 0, Math.PI * 2, false);
         ctx.fill();
 
-        ctx.fillStyle = "red";
+        ctx.fillStyle = 'red';
         ctx.beginPath();
         ctx.arc(ship.x, ship.y, ship.rad * 1.4, 0, Math.PI * 2, false);
         ctx.fill();
 
-        ctx.fillStyle = "orange";
+        ctx.fillStyle = 'orange';
         ctx.beginPath();
         ctx.arc(ship.x, ship.y, ship.rad * 1.1, 0, Math.PI * 2, false);
         ctx.fill();
 
-        ctx.fillStyle = "yellow";
+        ctx.fillStyle = 'yellow';
         ctx.beginPath();
         ctx.arc(ship.x, ship.y, ship.rad * 0.9, 0, Math.PI * 2, false);
         ctx.fill();
 
-        ctx.fillStyle = "white";
+        ctx.fillStyle = 'white';
         ctx.beginPath();
         ctx.arc(ship.x, ship.y, ship.rad * 0.6, 0, Math.PI * 2, false);
         ctx.fill();
@@ -189,7 +180,7 @@ function update() {
 
     // show ship bounding if enabled
     if (SHOW_BOUNDING) {
-        ctx.strokeStyle = "lime";
+        ctx.strokeStyle = 'lime';
         ctx.beginPath();
         ctx.arc(ship.x, ship.y, ship.rad, 0, Math.PI * 2, false);
         ctx.stroke();
@@ -205,7 +196,7 @@ function update() {
 
     for (let i = 0; i < roids.length; i++) {
         // set asteroid color, line-width
-        ctx.strokeStyle = "slategrey";
+        ctx.strokeStyle = 'slategrey';
         ctx.lineWidth = SHIP_SIZE / 20;
 
         // get the asteroid properties
@@ -234,7 +225,7 @@ function update() {
 
         // show asteroid bounding if enabled
         if (SHOW_BOUNDING) {
-            ctx.strokeStyle = "lime";
+            ctx.strokeStyle = 'lime';
             ctx.beginPath();
             ctx.arc(x, y, rad, 0, Math.PI * 2, false);
             ctx.stroke();
@@ -244,14 +235,13 @@ function update() {
         roids[i].y += roids[i].yVelocity;
 
         // handle edge of screen
-        if (x > canvas.width + rad) {
-            // use shorthand local x variable for comparison
+        if (x > canvas.width + rad) {  // use shorthand x variable for comparison
             roids[i].x = 0 - rad;
         } else if (x < 0 - rad) {
             roids[i].x = canvas.width + rad;
         }
 
-        if (y > canvas.height + rad) {
+        if (y > canvas.height + rad) {  // use shorthand y variable for comparison
             roids[i].y = 0 - rad;
         } else if (y < 0 - rad) {
             roids[i].y = canvas.height + rad;
@@ -287,32 +277,24 @@ function update() {
 
         // draw the thruster
             if (!exploding) {
-            ctx.fillStyle = "red";
-            ctx.strokeStyle = "yellow";
+            ctx.fillStyle = 'red';
+            ctx.strokeStyle = 'yellow';
             ctx.lineWidth = SHIP_SIZE * 0.1;
             ctx.beginPath();
             ctx.moveTo(
                 // rear left
-                ship.x -
-                    ship.rad *
-                        ((2 / 3) * Math.cos(ship.ang) + 0.65 * Math.sin(ship.ang)),
-                ship.y +
-                    ship.rad *
-                        ((2 / 3) * Math.sin(ship.ang) - 0.65 * Math.cos(ship.ang))
+                ship.x - ship.rad * (2/3 * Math.cos(ship.ang) + 0.65 * Math.sin(ship.ang)),
+                ship.y + ship.rad * (2/3 * Math.sin(ship.ang) - 0.65 * Math.cos(ship.ang))
             );
             ctx.lineTo(
                 // rear center
-                ship.x - ((ship.rad * 6) / 3) * Math.cos(ship.ang),
-                ship.y + ((ship.rad * 6) / 3) * Math.sin(ship.ang)
+                ship.x - ship.rad * 6/3 * Math.cos(ship.ang),
+                ship.y + ship.rad * 6/3 * Math.sin(ship.ang)
             );
             ctx.lineTo(
                 // rear right
-                ship.x -
-                    ship.rad *
-                        ((2 / 3) * Math.cos(ship.ang) - 0.65 * Math.sin(ship.ang)),
-                ship.y +
-                    ship.rad *
-                        ((2 / 3) * Math.sin(ship.ang) + 0.65 * Math.cos(ship.ang))
+                ship.x - ship.rad * (2/3 * Math.cos(ship.ang) - 0.65 * Math.sin(ship.ang)),
+                ship.y + ship.rad * (2/3 * Math.sin(ship.ang) + 0.65 * Math.cos(ship.ang))
             );
             ctx.closePath();
             ctx.fill();
@@ -337,7 +319,7 @@ function update() {
     }
     // center dot
     if (SHOW_CENTER_DOT) {
-        ctx.fillStyle = "red";
+        ctx.fillStyle = 'red';
         ctx.fillRect(ship.x - 1, ship.y - 1, 2, 2);
     }
 }
