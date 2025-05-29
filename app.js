@@ -131,25 +131,22 @@ function update() {
     // draw ship
     if (!exploding) {
         ctx.strokeStyle = 'white';
-        ctx.lineWidth = SHIP_SIZE * 0.1;
-        ctx.beginPath();
-        ctx.moveTo(
-            // nose of ship
-            ship.x + (6 / 4) * ship.rad * Math.cos(ship.ang),
-            ship.y - (6 / 4) * ship.rad * Math.sin(ship.ang)
-        );
-        ctx.lineTo(
-            // rear left
-            ship.x - ship.rad * (2 / 3) * Math.cos(ship.ang) + Math.sin(ship.ang),
-            ship.y + ship.rad * (2 / 3) * Math.sin(ship.ang) - Math.cos(ship.ang)
-        );
-        ctx.lineTo(
-            // rear right
-            ship.x - ship.rad * (2 / 3) * Math.cos(ship.ang) - Math.sin(ship.ang),
-            ship.y + ship.rad * (2 / 3) * Math.sin(ship.ang) + Math.cos(ship.ang)
-        );
-        ctx.closePath();
-        ctx.stroke();
+    ctx.lineWidth = SHIP_SIZE * 0.10;
+    ctx.beginPath();
+    ctx.moveTo( // nose of ship
+        ship.x + 6/4 * ship.rad * Math.cos(ship.ang),
+        ship.y - 6/4 * ship.rad * Math.sin(ship.ang)
+    );
+    ctx.lineTo( // rear left
+        ship.x - ship.rad * (2/3 * Math.cos(ship.ang) + Math.sin(ship.ang)),
+        ship.y + ship.rad * (2/3 * Math.sin(ship.ang) - Math.cos(ship.ang))
+    );
+    ctx.lineTo( // rear right
+        ship.x - ship.rad * (2/3 * Math.cos(ship.ang) - Math.sin(ship.ang)),
+        ship.y + ship.rad * (2/3 * Math.sin(ship.ang) + Math.cos(ship.ang))
+    );
+    ctx.closePath();
+    ctx.stroke();
     } else {
         // draw the explosion
         ctx.fillStyle = 'darkred';
