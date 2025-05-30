@@ -15,6 +15,7 @@ const SHIP_EXPLODE_DUR = 0.3; // duration of ship's explosion in seconds
 const SHIP_SIZE = 30; //height in pixels
 const SHIP_THRUST = 5; // acceleration of ship
 const TURN_SPEED = 360; // turn speed in degrees per sec
+const SHOOTING_TURN_SPEED = 180; // alternative turn speed for accurate aiming
 const SHOW_BOUNDING = false; // show or hide collision bounding
 const SHOW_CENTER_DOT = false; // show or hide ship's center dot
 
@@ -91,6 +92,7 @@ function newShip() {
         canShoot: true,
         lasers: [],
         rot: 0,
+        turnSpeed: TURN_SPEED,
         explodeTime: 0,
         thrusting: false,
         thrust: {
@@ -135,18 +137,21 @@ document.addEventListener('keyup', keyUp);
 function keyDown(/** @type {KeyboardEvent} */ ev) {
     switch (ev.key) {
         case 'ArrowLeft':
-            ship.rot = ((TURN_SPEED / 180) * Math.PI) / FPS;
+            ship.rot = ((ship.turnSpeed / 180) * Math.PI) / FPS; // degrees to radians, divided by frame rate
             break;
         case 'ArrowUp':
             ship.thrusting = true;
             break;
         case 'ArrowRight':
-            ship.rot = ((-TURN_SPEED / 180) * Math.PI) / FPS;
+            ship.rot = ((-ship.turnSpeed / 180) * Math.PI) / FPS; // degrees to radians, divided by frame rate
             break;
         case 'ArrowDown':
             break;
-        case ' ': // spacebar: shoot laser
+        case ' ': // Spacebar: shoot laser
             shootLaser();
+            break;
+        case 'Shift':
+            ship.turnSpeed = SHOOTING_TURN_SPEED;
             break;
     }
 }
@@ -165,6 +170,9 @@ function keyUp(/** @type {KeyboardEvent} */ ev) {
             break;
         case ' ': // re-allow shooting
             ship.canShoot = true;
+            break;
+        case 'Shift':
+            ship.turnSpeed = TURN_SPEED;
             break;
     }
 }
@@ -234,6 +242,19 @@ function update() {
                 ship.y + ship.rad * (2/3 * Math.sin(ship.ang) + Math.cos(ship.ang))
             );
             ctx.closePath();
+            ctx.stroke();
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(
+                ship.x + 6 / 4 * ship.rad * Math.cos(ship.ang),
+                ship.y - 6 / 4 * ship.rad * Math.sin(ship.ang)
+            );
+            ctx.lineTo(
+                ship.x + 100 * ship.rad * Math.cos(ship.ang),
+                ship.y - 100 * ship.rad * Math.sin(ship.ang)
+            );
             ctx.stroke();
         }
         // handle ship blinking
