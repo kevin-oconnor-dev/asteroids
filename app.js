@@ -5,7 +5,9 @@ const ROIDS_SIZE = 50; // starting size of asteroids in pixels
 const ROIDS_JAG = 0.3; // jaggedness of asteroids (0 = none, 1 = max)
 const ROIDS_VERT = 10; // average number of verticies on asteroids
 const ROIDS_SPEED = 50; // max starting speed of asteroids in pixels per second
-const SHIP_EXPLODE_DIR = 0.3; // duration of ship's explosion
+const SHIP_BLINK_DUR = 0.1; // duration of ship's blink during invisibility in seconds
+const SHIP_INVINCE_DUR = 3; // duration of the ship's invincibility in seconds
+const SHIP_EXPLODE_DUR = 0.3; // duration of ship's explosion
 const SHIP_SIZE = 30; //height in pixels
 const SHIP_THRUST = 5; // acceleration of ship
 const TURN_SPEED = 360; // turn speed in degrees per sec
@@ -65,6 +67,8 @@ function newShip() {
         y: canvas.height / 2,
         rad: SHIP_SIZE / 2,
         ang: (90 / 180) * Math.PI, // convert degrees to radians
+        blinkNum: Math.ceil(SHIP_INVINCE_DUR / SHIP_BLINK_DUR), // total amount of blinks
+        blinkTime: Math.ceil(SHIP_BLINK_DUR * FPS), // blink length in frames
         rot: 0,
         explodeTime: 0,
         thrusting: false,
@@ -80,7 +84,7 @@ function distBetweenPoints(x1, y1, x2, y2) {
 }
 
 function explodeShip() {
-    ship.explodeTime = Math.ceil(SHIP_EXPLODE_DIR * FPS);
+    ship.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
 }
 
 // set up event handlers
@@ -122,6 +126,7 @@ function keyUp(/** @type {KeyboardEvent} */ ev) {
 setInterval(update, 1000 / FPS);
 
 function update() {
+    let blinkOn = ship.blinkNum % 2 === 0;
     let exploding = ship.explodeTime > 0;
 
     // draw space
@@ -165,23 +170,47 @@ function update() {
 
     // draw ship
     if (!exploding) {
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = SHIP_SIZE * 0.10;
-        ctx.beginPath();
-        ctx.moveTo( // nose of ship
-            ship.x + 6/4 * ship.rad * Math.cos(ship.ang),
-            ship.y - 6/4 * ship.rad * Math.sin(ship.ang)
-        );
-        ctx.lineTo( // rear left
-            ship.x - ship.rad * (2/3 * Math.cos(ship.ang) + Math.sin(ship.ang)),
-            ship.y + ship.rad * (2/3 * Math.sin(ship.ang) - Math.cos(ship.ang))
-        );
-        ctx.lineTo( // rear right
-            ship.x - ship.rad * (2/3 * Math.cos(ship.ang) - Math.sin(ship.ang)),
-            ship.y + ship.rad * (2/3 * Math.sin(ship.ang) + Math.cos(ship.ang))
-        );
-        ctx.closePath();
-        ctx.stroke();
+        if (blinkOn) {
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = SHIP_SIZE * 0.10;
+            ctx.beginPath();
+            ctx.moveTo( // nose of ship
+                ship.x + 6/4 * ship.rad * Math.cos(ship.ang),
+                ship.y - 6/4 * ship.rad * Math.sin(ship.ang)
+            );
+            ctx.lineTo( // rear left
+                ship.x - ship.rad * (2/3 * Math.cos(ship.ang) + Math.sin(ship.ang)),
+                ship.y + ship.rad * (2/3 * Math.sin(ship.ang) - Math.cos(ship.ang))
+            );
+            ctx.lineTo( // rear right
+                ship.x - ship.rad * (2/3 * Math.cos(ship.ang) - Math.sin(ship.ang)),
+                ship.y + ship.rad * (2/3 * Math.sin(ship.ang) + Math.cos(ship.ang))
+            );
+            ctx.closePath();
+            ctx.stroke();
+        }
+        console.log(`blink time: ${ship.blinkTime}, blink num: ${ship.blinkNum}`)
+        // handle ship blinking
+        if (ship.blinkNum > 0) {
+
+            // reduce the blink time
+            ship.blinkTime--;
+
+            // reduce the blink number
+            if (ship.blinkTime === 0) {
+                ship.blinkTime = Math.ceil(SHIP_BLINK_DUR * FPS);
+                ship.blinkNum--;
+            }
+
+            // cancel blink on ship thrust
+            if (ship.thrusting) {
+                setTimeout( () => {
+                    ship.blinkNum = 0;
+                    ship.blinkTime = 0;
+                }, 500)
+            }
+        }
+
     } else {
         // draw the explosion
         ctx.fillStyle = 'darkred';
@@ -281,10 +310,12 @@ function update() {
     }
 
     if (!exploding) {
-        for (let i = 0; i < roids.length; i++) {
-            // handle asteroid collison
-            if (distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) < ship.rad + roids[i].rad) {
-                explodeShip();
+        if (ship.blinkNum === 0) {
+            for (let i = 0; i < roids.length; i++) {
+                // handle asteroid collison
+                if (distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) < ship.rad + roids[i].rad) {
+                    explodeShip();
+                }
             }
         }
         
