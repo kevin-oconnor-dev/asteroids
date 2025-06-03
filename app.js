@@ -14,8 +14,8 @@ const SHIP_INVINCE_DUR = 3; // duration of the ship's invincibility in seconds
 const SHIP_EXPLODE_DUR = 0.3; // duration of ship's explosion in seconds
 const SHIP_SIZE = 30; //height in pixels
 const SHIP_THRUST = 5; // acceleration of ship
-const TURN_SPEED = 360; // turn speed in degrees per sec
-const SHOOTING_TURN_SPEED = 180; // alternative turn speed for accurate aiming
+const TURN_SPEED = 270; // turn speed in degrees per sec
+const SHOOTING_TURN_SPEED = 130; // alternative turn speed for accurate aiming
 const SHOW_BOUNDING = false; // show or hide collision bounding
 const SHOW_CENTER_DOT = false; // show or hide ship's center dot
 
@@ -23,18 +23,22 @@ const SHOW_CENTER_DOT = false; // show or hide ship's center dot
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
-// create space ship
-let ship = newShip();
+// set up game parameters
+let level = 0;
+let lives = 3;
+let roidsQuantity = 0;
+let ship;
+let levelCheck = true;
 
 // set up asteroids
 
 let roids = [];
-createAsteroidBelt();
+newGame();
 
-function createAsteroidBelt() {
+function createAsteroidBelt(num) {
     roids = [];
     let x, y;
-    for (let i = 0; i < ROIDS_NUM; i++) {
+    for (let i = 0; i < num; i++) {
         do {
             x = Math.floor(Math.random() * canvas.width);
             y = Math.floor(Math.random() * canvas.height);
@@ -78,6 +82,30 @@ function newAsteroid(x, y, rad) {
     }
 
     return roid;
+}
+
+function newGame() {
+    ship = newShip();
+    nextLevel();
+}
+
+function nextLevel() {
+    level += 1;
+    roidsQuantity += 2;
+
+    const levelMessage = document.querySelector('#level-msg');
+    levelMessage.style.opacity = '1' // show level indicator
+    levelMessage.innerText = `Level ${level}`;
+    setTimeout( () => {
+        levelMessage.style.opacity = '0';
+    }, 3000)
+
+    // create delay between levels
+    if (level > 1) {
+        setTimeout(() => createAsteroidBelt(roidsQuantity), 1000);
+    } else {
+        createAsteroidBelt(roidsQuantity);
+    }
 }
 
 // set up ship
@@ -183,6 +211,15 @@ setInterval(update, 1000 / FPS);
 function update() {
     let blinkOn = ship.blinkNum % 2 === 0;
     let exploding = ship.explodeTime > 0;
+
+    // check if level is cleared
+    if (roids.length === 0 && levelCheck) {
+        levelCheck = false;
+        nextLevel();
+        setTimeout( () => {
+            levelCheck = true;
+        }, 3000)
+    }
 
     // draw space
     ctx.fillStyle = 'black';

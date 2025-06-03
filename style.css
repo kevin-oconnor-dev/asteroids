@@ -2,3 +2,14 @@
     box-sizing: border-box;
     margin: 0;
 }
+#level-msg {
+    font-size: 2em;
+    color: rgba(255, 146, 12, 0.84);
+    font-family: "Orbitron";
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 150px;
+    left: 350px;
+    opacity: 0;
+    transition: all 0.3s;
+}
