@@ -1,5 +1,6 @@
 const FPS = 30;
 const FRICTION = 0.7; // friction coefficient of space (0 = no friction, 1 = max friction)
+const GAME_LIVES = 3; // starting number of lives
 const LASER_DIST = 0.5; // maximum distance of laser travel as a fraction of the screen width
 const LASER_MAX = 10; // maximum number of lasers on screen
 const LASER_SPEED = 600; // speed of lasers in pixels per second
@@ -31,7 +32,7 @@ const ctx = canvas.getContext('2d');
 
 // set up game parameters
 let level = 1;
-let lives = 3;
+let lives = GAME_LIVES;
 let roidsQuantity = 0;
 let ship;
 let roids = [];
@@ -158,6 +159,25 @@ function shootLaser() {
 function distBetweenPoints(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
+function drawShip(x, y, ang) {
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = SHIP_SIZE * 0.10;
+    ctx.beginPath();
+    ctx.moveTo( // nose of ship
+        x + 6/4 * ship.rad * Math.cos(ang),
+        y - 6/4 * ship.rad * Math.sin(ang)
+    );
+    ctx.lineTo( // rear left
+        x - ship.rad * (2/3 * Math.cos(ang) + Math.sin(ang)),
+        y + ship.rad * (2/3 * Math.sin(ang) - Math.cos(ang))
+    );
+    ctx.lineTo( // rear right
+        x - ship.rad * (2/3 * Math.cos(ang) - Math.sin(ang)),
+        y + ship.rad * (2/3 * Math.sin(ang) + Math.cos(ang))
+    );
+    ctx.closePath();
+    ctx.stroke();
+}
 
 function explodeShip() {
     ship.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
@@ -273,23 +293,7 @@ function update() {
     // draw ship
     if (!exploding) {
         if (blinkOn) {
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = SHIP_SIZE * 0.10;
-            ctx.beginPath();
-            ctx.moveTo( // nose of ship
-                ship.x + 6/4 * ship.rad * Math.cos(ship.ang),
-                ship.y - 6/4 * ship.rad * Math.sin(ship.ang)
-            );
-            ctx.lineTo( // rear left
-                ship.x - ship.rad * (2/3 * Math.cos(ship.ang) + Math.sin(ship.ang)),
-                ship.y + ship.rad * (2/3 * Math.sin(ship.ang) - Math.cos(ship.ang))
-            );
-            ctx.lineTo( // rear right
-                ship.x - ship.rad * (2/3 * Math.cos(ship.ang) - Math.sin(ship.ang)),
-                ship.y + ship.rad * (2/3 * Math.sin(ship.ang) + Math.cos(ship.ang))
-            );
-            ctx.closePath();
-            ctx.stroke();
+            drawShip(ship.x, ship.y, ship.ang);
 
             // draw shooting sightline
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
@@ -393,6 +397,11 @@ function update() {
                 break;
             }
         }
+    }
+
+    // draw the player's lives
+    for (let i = 0; i < lives; i++) {
+        drawShip();
     }
 
     // show ship bounding if enabled
