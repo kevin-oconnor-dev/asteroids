@@ -2,7 +2,7 @@ const FPS = 30;
 const FRICTION = 0.7; // friction coefficient of space (0 = no friction, 1 = max friction)
 const LASER_DIST = 0.5; // maximum distance of laser travel as a fraction of the screen width
 const LASER_MAX = 10; // maximum number of lasers on screen
-const LASER_SPEED = 500; // speed of lasers in pixels per second
+const LASER_SPEED = 600; // speed of lasers in pixels per second
 const LASER_EXPLODE_DUR = 0.1; // duration of laser explosions in seconds
 const ROIDS_NUM = 10; // starting number of asteroids
 const ROIDS_SIZE = 70; // starting size of asteroids in pixels
@@ -15,9 +15,15 @@ const SHIP_EXPLODE_DUR = 0.3; // duration of ship's explosion in seconds
 const SHIP_SIZE = 30; //height in pixels
 const SHIP_THRUST = 5; // acceleration of ship
 const TURN_SPEED = 270; // turn speed in degrees per sec
-const SHOOTING_TURN_SPEED = 130; // alternative turn speed for accurate aiming
+const SHOOTING_TURN_SPEED = 100; // alternative turn speed for accurate aiming
 const SHOW_BOUNDING = false; // show or hide collision bounding
 const SHOW_CENTER_DOT = false; // show or hide ship's center dot
+
+// shared state for event handlers
+const inputState = {
+    leftHeld: false,
+    rightHeld: false
+}
 
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('game-canvas');
@@ -165,12 +171,14 @@ document.addEventListener('keyup', keyUp);
 function keyDown(/** @type {KeyboardEvent} */ ev) {
     switch (ev.key) {
         case 'ArrowLeft':
+            inputState.leftHeld = true;
             ship.rot = ((ship.turnSpeed / 180) * Math.PI) / FPS; // degrees to radians, divided by frame rate
             break;
         case 'ArrowUp':
             ship.thrusting = true;
             break;
         case 'ArrowRight':
+            inputState.rightHeld = true;
             ship.rot = ((-ship.turnSpeed / 180) * Math.PI) / FPS; // degrees to radians, divided by frame rate
             break;
         case 'ArrowDown':
@@ -180,19 +188,24 @@ function keyDown(/** @type {KeyboardEvent} */ ev) {
             break;
         case 'Shift':
             ship.turnSpeed = SHOOTING_TURN_SPEED;
+            // update turn speed
+            if (inputState.leftHeld) ship.rot = ((ship.turnSpeed / 180) * Math.PI) / FPS;
+            if (inputState.rightHeld) ship.rot = ((-ship.turnSpeed / 180) * Math.PI) / FPS;
             break;
     }
 }
 function keyUp(/** @type {KeyboardEvent} */ ev) {
     switch (ev.key) {
         case 'ArrowLeft':
-            ship.rot = 0;
+            inputState.leftHeld = false;
+            if (!inputState.rightHeld) ship.rot = 0;
             break;
         case 'ArrowUp':
             ship.thrusting = false;
             break;
         case 'ArrowRight':
-            ship.rot = 0;
+            inputState.rightHeld = false;
+            if(!inputState.leftHeld) ship.rot = 0;
             break;
         case 'ArrowDown':
             break;
@@ -201,6 +214,9 @@ function keyUp(/** @type {KeyboardEvent} */ ev) {
             break;
         case 'Shift':
             ship.turnSpeed = TURN_SPEED;
+            // update turn speed
+            if (inputState.leftHeld) ship.rot = ((ship.turnSpeed / 180) * Math.PI) / FPS;
+            if (inputState.rightHeld) ship.rot = ((-ship.turnSpeed / 180) * Math.PI) / FPS;
             break;
     }
 }
@@ -281,6 +297,7 @@ function update() {
             ctx.closePath();
             ctx.stroke();
 
+            // draw shooting sightline
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
             ctx.lineWidth = 5;
             ctx.beginPath();
