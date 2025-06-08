@@ -30,91 +30,19 @@ const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
 // set up game parameters
-let level = 0;
+let level = 1;
 let lives = 3;
 let roidsQuantity = 0;
 let ship;
-let levelCheck = true;
-
-// set up asteroids
-
 let roids = [];
+
 newGame();
-
-function createAsteroidBelt(num) {
-    roids = [];
-    let x, y;
-    for (let i = 0; i < num; i++) {
-        do {
-            x = Math.floor(Math.random() * canvas.width);
-            y = Math.floor(Math.random() * canvas.height);
-        } while (
-            distBetweenPoints(ship.x, ship.y, x, y) < ROIDS_SIZE * 2 + ship.rad
-        );
-        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 2)));
-    }
-}
-
-function destroyAsteroid(index) {
-    let x = roids[index].x;
-    let y = roids[index].y;
-    let rad = roids[index].rad;
-
-    if (rad === Math.ceil(ROIDS_SIZE / 2)) {
-        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 3.5) ));
-        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 3.5) ));
-    } else if (rad === Math.ceil(ROIDS_SIZE / 3.5)) {
-        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 6)));
-        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 6)));
-    }
-    roids.splice(index, 1);
-}
-
-function newAsteroid(x, y, rad) {
-    let roid = {
-        x: x,
-        y: y,
-        xVelocity: Math.random() * ROIDS_SPEED / FPS * (Math.random() < 0.5 ? 1 : -1),
-        yVelocity: Math.random() * ROIDS_SPEED / FPS * (Math.random() < 0.5 ? 1 : -1),
-        rad: rad,
-        ang: Math.random() * Math.PI * 2,
-        vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT / 2),
-        offsets: [],
-    };
-
-    // populate the offsets array for asteroid vertices
-    for (let i = 0; i < roid.vert; i++) {
-        roid.offsets.push(Math.random() * ROIDS_JAG * 2 + 1 - ROIDS_JAG);
-    }
-
-    return roid;
-}
 
 function newGame() {
     ship = newShip();
     nextLevel();
 }
 
-function nextLevel() {
-    level += 1;
-    roidsQuantity += 2;
-
-    const levelMessage = document.querySelector('#level-msg');
-    levelMessage.style.opacity = '1' // show level indicator
-    levelMessage.innerText = `Level ${level}`;
-    setTimeout( () => {
-        levelMessage.style.opacity = '0';
-    }, 3000)
-
-    // create delay between levels
-    if (level > 1) {
-        setTimeout(() => createAsteroidBelt(roidsQuantity), 1000);
-    } else {
-        createAsteroidBelt(roidsQuantity);
-    }
-}
-
-// set up ship
 function newShip() {
     return {
         x: canvas.width / 2,
@@ -133,6 +61,81 @@ function newShip() {
             x: 0,
             y: 0,
         },
+    }
+}
+
+function nextLevel() {
+    roidsQuantity = level * 2;
+
+    const levelMessage = document.querySelector('#level-msg');
+    levelMessage.style.opacity = '1' // show level indicator
+    levelMessage.innerText = `Level ${level}`;
+    setTimeout( () => {
+        levelMessage.style.opacity = '0';
+    }, 3000)
+
+    // create delay between levels
+    if (level > 1) {
+        setTimeout(() => createAsteroidBelt(roidsQuantity), 1000);
+    } else {
+        createAsteroidBelt(roidsQuantity);
+    }
+    level++;
+}
+
+function createAsteroidBelt(num) {
+    roids = [];
+    let x, y;
+    for (let i = 0; i < num; i++) {
+        do {
+            x = Math.floor(Math.random() * canvas.width);
+            y = Math.floor(Math.random() * canvas.height);
+        } while (
+            distBetweenPoints(ship.x, ship.y, x, y) < ROIDS_SIZE * 2 + ship.rad
+        );
+        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 2)));
+    }
+}
+
+function newAsteroid(x, y, rad) {
+    let roidSpeedMult = 1 + 0.1 * level;
+    let roid = {
+        x: x,
+        y: y,
+        xVelocity: Math.random() * ROIDS_SPEED * roidSpeedMult / FPS * (Math.random() < 0.5 ? 1 : -1),
+        yVelocity: Math.random() * ROIDS_SPEED * roidSpeedMult / FPS * (Math.random() < 0.5 ? 1 : -1),
+        rad: rad,
+        ang: Math.random() * Math.PI * 2,
+        vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT / 2),
+        offsets: [],
+    };
+
+    // populate the offsets array for asteroid vertices
+    for (let i = 0; i < roid.vert; i++) {
+        roid.offsets.push(Math.random() * ROIDS_JAG * 2 + 1 - ROIDS_JAG);
+    }
+
+    return roid;
+}
+
+function destroyAsteroid(index) {
+    let x = roids[index].x;
+    let y = roids[index].y;
+    let rad = roids[index].rad;
+
+    // break asteroid into pieces in necessary
+    if (rad === Math.ceil(ROIDS_SIZE / 2)) {
+        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 3.5) ));
+        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 3.5) ));
+    } else if (rad === Math.ceil(ROIDS_SIZE / 3.5)) {
+        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 6)));
+        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 6)));
+    }
+    roids.splice(index, 1);
+
+    // check if level is cleared
+    if (roids.length === 0) {
+        nextLevel();
     }
 }
 
@@ -228,20 +231,11 @@ function update() {
     let blinkOn = ship.blinkNum % 2 === 0;
     let exploding = ship.explodeTime > 0;
 
-    // check if level is cleared
-    if (roids.length === 0 && levelCheck) {
-        levelCheck = false;
-        nextLevel();
-        setTimeout( () => {
-            levelCheck = true;
-        }, 3000)
-    }
-
     // draw space
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-// thrust the ship
+    // thrust the ship
     if (ship.thrusting) {
         ship.thrust.x += (SHIP_THRUST * Math.cos(ship.ang)) / FPS;
         ship.thrust.y -= (SHIP_THRUST * Math.sin(ship.ang)) / FPS;
@@ -392,7 +386,7 @@ function update() {
        for (let j = ship.lasers.length - 1; j >= 0; j--) {
             if (distBetweenPoints(roids[i].x, roids[i].y, ship.lasers[j].x, ship.lasers[j].y) < roids[i].rad) {
                 
-                // destory asteroid and active laser explosion
+                // destroy asteroid and activate laser explosion
                 destroyAsteroid(i);
                 ship.lasers[j].explodeTime = Math.ceil(LASER_EXPLODE_DUR * FPS);
 
@@ -499,7 +493,7 @@ function update() {
         }
     }
 
-// move lasers 
+    // move lasers 
     for (let i = ship.lasers.length - 1; i >= 0; i--) {
 
         // check distance traveled
