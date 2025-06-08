@@ -6,6 +6,9 @@ const LASER_MAX = 10; // maximum number of lasers on screen
 const LASER_SPEED = 600; // speed of lasers in pixels per second
 const LASER_EXPLODE_DUR = 0.1; // duration of laser explosions in seconds
 const ROIDS_NUM = 10; // starting number of asteroids
+const ROIDS_POINTS_LARGE = 20; // point amount per large asteroid
+const ROIDS_POINTS_MEDIUM = 50; // point amount per medium asteroid
+const ROIDS_POINTS_SMALL = 100; // point amount per small asteroid
 const ROIDS_SIZE = 70; // starting size of asteroids in pixels
 const ROIDS_JAG = 0.3; // jaggedness of asteroids (0 = none, 1 = max)
 const ROIDS_VERT = 10; // average number of verticies on asteroids
@@ -26,6 +29,7 @@ const inputState = {
     rightHeld: false
 }
 const gameMessage = document.querySelector('#game-msg');
+const gameScore = document.querySelector('#game-score');
 
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('game-canvas');
@@ -33,7 +37,8 @@ const ctx = canvas.getContext('2d');
 
 // set up game parameters
 let level = 1;
-let lives = 1;
+let score = 0;
+let lives = GAME_LIVES;
 let roidsQuantity = 0;
 let ship;
 let roids = [];
@@ -42,6 +47,9 @@ newGame();
 
 function newGame() {
     level = 1;
+    score = 0;
+    lives = GAME_LIVES;
+    gameScore.innerText = score;
     gameMessage.className = 'level';
     ship = newShip();
     ship.alive = true;
@@ -132,10 +140,15 @@ function destroyAsteroid(index) {
     if (rad === Math.ceil(ROIDS_SIZE / 2)) {
         roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 3.5) ));
         roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 3.5) ));
+        score += ROIDS_POINTS_LARGE;
     } else if (rad === Math.ceil(ROIDS_SIZE / 3.5)) {
         roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 6)));
         roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 6)));
+        score += ROIDS_POINTS_MEDIUM;
+    } else {
+        score += ROIDS_POINTS_SMALL;
     }
+    gameScore.innerText = score;
     roids.splice(index, 1);
 
     // check if level is cleared
@@ -154,6 +167,7 @@ function shootLaser() {
             yVelocity: LASER_SPEED * Math.sin(ship.ang) / FPS,
             dist: 0,
             explodeTime: 0,
+            active: true
         })
     }
     // prevent shooting more than once per press
@@ -190,11 +204,23 @@ function explodeShip() {
 function gameOver() {
     ship.alive = false;
     const subTitle = document.createElement('div');
+
     subTitle.innerText = 'Press enter to reset';
     gameMessage.className = 'game-over';
     gameMessage.innerText = 'GAME OVER';
     gameMessage.appendChild(subTitle);
     gameMessage.style.opacity = 1;
+
+    // create subtitle blink effect
+    let subTitleHidden = false;
+    setInterval( () => {
+        if (subTitleHidden) {
+            subTitle.style.visibility = '';
+            subTitleHidden = false;
+        } else {
+            subTitle.style.visibility = 'hidden';
+            subTitleHidden = true;
+        }}, 500)
 }
 
 function explodeRoid(roid) {
@@ -409,11 +435,12 @@ function update() {
 
         // loop over lasers
        for (let j = ship.lasers.length - 1; j >= 0; j--) {
-            if (distBetweenPoints(roids[i].x, roids[i].y, ship.lasers[j].x, ship.lasers[j].y) < roids[i].rad) {
-                
+            let distBetween = distBetweenPoints(roids[i].x, roids[i].y, ship.lasers[j].x, ship.lasers[j].y);
+            if (distBetween < roids[i].rad && ship.lasers[j].active) {
                 // destroy asteroid and activate laser explosion
                 destroyAsteroid(i);
                 ship.lasers[j].explodeTime = Math.ceil(LASER_EXPLODE_DUR * FPS);
+                ship.lasers[j].active = false;
 
                 break;
             }

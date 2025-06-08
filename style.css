@@ -24,3 +24,11 @@
 #game-msg.game-over {
     color: white;
 }
+#score-header {
+    position: absolute;
+    font-family: "Orbitron";
+    transform: translate(-50%, -50%);
+    top: 30px;
+    left: 350px;
+    color: white;
+}
