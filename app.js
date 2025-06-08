@@ -13,7 +13,7 @@ const ROIDS_SPEED = 50; // max starting speed of asteroids in pixels per second
 const SHIP_BLINK_DUR = 0.1; // duration of ship's blink during invisibility in seconds
 const SHIP_INVINCE_DUR = 3; // duration of the ship's invincibility in seconds
 const SHIP_EXPLODE_DUR = 0.3; // duration of ship's explosion in seconds
-const SHIP_SIZE = 30; //height in pixels
+const SHIP_SIZE = 30; // height in pixels
 const SHIP_THRUST = 5; // acceleration of ship
 const TURN_SPEED = 270; // turn speed in degrees per sec
 const SHOOTING_TURN_SPEED = 100; // alternative turn speed for accurate aiming
@@ -25,6 +25,7 @@ const inputState = {
     leftHeld: false,
     rightHeld: false
 }
+const gameMessage = document.querySelector('#game-msg');
 
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('game-canvas');
@@ -32,7 +33,7 @@ const ctx = canvas.getContext('2d');
 
 // set up game parameters
 let level = 1;
-let lives = GAME_LIVES;
+let lives = 1;
 let roidsQuantity = 0;
 let ship;
 let roids = [];
@@ -40,7 +41,10 @@ let roids = [];
 newGame();
 
 function newGame() {
+    level = 1;
+    gameMessage.className = 'level';
     ship = newShip();
+    ship.alive = true;
     nextLevel();
 }
 
@@ -57,6 +61,7 @@ function newShip() {
         rot: 0,
         turnSpeed: TURN_SPEED,
         explodeTime: 0,
+        alive: true,
         thrusting: false,
         thrust: {
             x: 0,
@@ -68,11 +73,10 @@ function newShip() {
 function nextLevel() {
     roidsQuantity = level * 2;
 
-    const levelMessage = document.querySelector('#level-msg');
-    levelMessage.style.opacity = '1' // show level indicator
-    levelMessage.innerText = `Level ${level}`;
+    gameMessage.style.opacity = '1' // show level indicator
+    gameMessage.innerText = `Level ${level}`;
     setTimeout( () => {
-        levelMessage.style.opacity = '0';
+        gameMessage.style.opacity = '0';
     }, 3000)
 
     // create delay between levels
@@ -183,6 +187,16 @@ function explodeShip() {
     ship.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
 }
 
+function gameOver() {
+    ship.alive = false;
+    const subTitle = document.createElement('div');
+    subTitle.innerText = 'Press enter to reset';
+    gameMessage.className = 'game-over';
+    gameMessage.innerText = 'GAME OVER';
+    gameMessage.appendChild(subTitle);
+    gameMessage.style.opacity = 1;
+}
+
 function explodeRoid(roid) {
     roid.style.display = 'none';
 }
@@ -192,6 +206,11 @@ document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
 
 function keyDown(/** @type {KeyboardEvent} */ ev) {
+    if (!ship.alive) {
+        if (ev.key === 'Enter') newGame();
+        return;
+    }
+
     switch (ev.key) {
         case 'ArrowLeft':
             inputState.leftHeld = true;
@@ -218,6 +237,8 @@ function keyDown(/** @type {KeyboardEvent} */ ev) {
     }
 }
 function keyUp(/** @type {KeyboardEvent} */ ev) {
+    if (!ship.alive) return;
+
     switch (ev.key) {
         case 'ArrowLeft':
             inputState.leftHeld = false;
@@ -256,7 +277,7 @@ function update() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // thrust the ship
-    if (ship.thrusting) {
+    if (ship.thrusting && ship.alive) {
         ship.thrust.x += (SHIP_THRUST * Math.cos(ship.ang)) / FPS;
         ship.thrust.y -= (SHIP_THRUST * Math.sin(ship.ang)) / FPS;
 
@@ -292,7 +313,7 @@ function update() {
 
     // draw ship
     if (!exploding) {
-        if (blinkOn) {
+        if (blinkOn && ship.alive) {
             drawShip(ship.x, ship.y, ship.ang);
 
             // draw shooting sightline
@@ -401,7 +422,11 @@ function update() {
 
     // draw the player's lives
     for (let i = 0; i < lives; i++) {
-        drawShip();
+        const margin = SHIP_SIZE;
+        const x = margin + i * margin * 1.25;
+        const y = SHIP_SIZE + 5;
+        const ang = 0.5 * Math.PI;
+        drawShip(x, y, ang);
     }
 
     // show ship bounding if enabled
@@ -478,7 +503,7 @@ function update() {
     if (!exploding) {
 
         // only check when ship isn't blinking
-        if (ship.blinkNum === 0) {
+        if (ship.blinkNum === 0 && ship.alive) {
             for (let i = 0; i < roids.length; i++) {
                 if (distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) < ship.rad + roids[i].rad) {
                     explodeShip();
@@ -498,7 +523,12 @@ function update() {
         ship.explodeTime--;
 
         if (ship.explodeTime === 0) {
-            ship = newShip();
+            lives--;
+            if (lives <= 0) {
+                gameOver();
+            } else {
+                ship = newShip();
+            }
         }
     }
 
