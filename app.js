@@ -54,7 +54,7 @@ window.addEventListener('resize', positionText);
 // set up game parameters
 let level = 1;
 let score = 0;
-let highScore = 0;
+let highScore = localStorage.getItem('highScore') ?? 0;
 let lives = GAME_LIVES;
 let roidsQuantity = 0;
 let ship;
@@ -66,11 +66,11 @@ function newGame() {
     level = 1;
     score = 0;
     lives = GAME_LIVES;
-    gameScoreDisplay.innerText = `Score: ${score}`;
     gameMessage.className = 'level';
     ship = newShip();
     ship.alive = true;
     nextLevel();
+    updateScore();
 }
 
 function newShip() {
@@ -165,13 +165,20 @@ function destroyAsteroid(index) {
     } else {
         score += ROIDS_POINTS_SMALL;
     }
-    gameScoreDisplay.innerText = `Score: ${score}`;
+    updateScore();
     roids.splice(index, 1);
 
     // check if level is cleared
     if (roids.length === 0) {
         nextLevel();
     }
+}
+
+function updateScore() {
+    if (score > highScore) highScore = score;
+    gameScoreDisplay.innerText = `Score: ${score}`;
+    highScoreDisplay.innerText = `Best: ${highScore}`;
+    localStorage.setItem('highScore', String(highScore));
 }
 
 function shootLaser() {
