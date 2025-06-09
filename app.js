@@ -29,23 +29,32 @@ const inputState = {
     rightHeld: false
 }
 const gameMessage = document.querySelector('#game-msg');
-const gameScore = document.querySelector('#game-score');
+const gameScoreDisplay = document.querySelector('#game-score');
+const highScoreDisplay = document.querySelector('#high-score');
 
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
 // get canvas screen coordinates
-const rect = canvas.getBoundingClientRect();
-gameMessage.style.top = `${rect.top + canvas.clientHeight / 2 - (SHIP_SIZE * 2)}px`;
-gameMessage.style.left = `${rect.left + canvas.clientWidth / 2}px`;
+function positionText() {
+    const rect = canvas.getBoundingClientRect();
+    gameMessage.style.top = `${rect.top + canvas.clientHeight / 2 - (SHIP_SIZE * 2)}px`;
+    gameMessage.style.left = `${rect.left + canvas.clientWidth / 2}px`;
 
-gameScore.style.top = `${rect.top + 15}px`;
-gameScore.style.left = `${rect.left + canvas.clientWidth / 2}px`
+    gameScoreDisplay.style.top = `${rect.top + 15}px`;
+    gameScoreDisplay.style.left = `${rect.left + canvas.clientWidth / 2}px`
+
+    highScoreDisplay.style.top = `${rect.top + 15}px`
+    highScoreDisplay.style.left = `${rect.right - highScoreDisplay.clientWidth}px`;
+}
+positionText();
+window.addEventListener('resize', positionText);
 
 // set up game parameters
 let level = 1;
 let score = 0;
+let highScore = 0;
 let lives = GAME_LIVES;
 let roidsQuantity = 0;
 let ship;
@@ -57,7 +66,7 @@ function newGame() {
     level = 1;
     score = 0;
     lives = GAME_LIVES;
-    gameScore.innerText = `Score: ${score}`;
+    gameScoreDisplay.innerText = `Score: ${score}`;
     gameMessage.className = 'level';
     ship = newShip();
     ship.alive = true;
@@ -156,7 +165,7 @@ function destroyAsteroid(index) {
     } else {
         score += ROIDS_POINTS_SMALL;
     }
-    gameScore.innerText = `Score: ${score}`;
+    gameScoreDisplay.innerText = `Score: ${score}`;
     roids.splice(index, 1);
 
     // check if level is cleared

@@ -32,9 +32,12 @@ body {
 #game-msg.game-over {
     color: white;
 }
-#game-score {
+#game-score, #high-score {
     position: absolute;
     font-family: "Orbitron";
     transform: translateX(-50%);
     color: white;
+}
+#high-score {
+    font-size: 1.2em;
 }
