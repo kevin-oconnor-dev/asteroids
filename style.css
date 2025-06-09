@@ -2,13 +2,21 @@
     box-sizing: border-box;
     margin: 0;
 }
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+#game-canvas {
+    display: block;
+    margin: auto;
+}
 #game-msg {
     font-size: 2em;
     font-family: "Orbitron";
     position: absolute;
     transform: translate(-50%, -50%);
-    top: 150px;
-    left: 350px;
     opacity: 0;
     transition: all 0.3s;
 }
@@ -24,11 +32,9 @@
 #game-msg.game-over {
     color: white;
 }
-#score-header {
+#game-score {
     position: absolute;
     font-family: "Orbitron";
-    transform: translate(-50%, -50%);
-    top: 30px;
-    left: 350px;
+    transform: translateX(-50%);
     color: white;
 }

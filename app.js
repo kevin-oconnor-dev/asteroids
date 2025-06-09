@@ -9,7 +9,7 @@ const ROIDS_NUM = 10; // starting number of asteroids
 const ROIDS_POINTS_LARGE = 20; // point amount per large asteroid
 const ROIDS_POINTS_MEDIUM = 50; // point amount per medium asteroid
 const ROIDS_POINTS_SMALL = 100; // point amount per small asteroid
-const ROIDS_SIZE = 70; // starting size of asteroids in pixels
+const ROIDS_SIZE = 120; // starting size of asteroids in pixels
 const ROIDS_JAG = 0.3; // jaggedness of asteroids (0 = none, 1 = max)
 const ROIDS_VERT = 10; // average number of verticies on asteroids
 const ROIDS_SPEED = 50; // max starting speed of asteroids in pixels per second
@@ -35,6 +35,14 @@ const gameScore = document.querySelector('#game-score');
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
+// get canvas screen coordinates
+const rect = canvas.getBoundingClientRect();
+gameMessage.style.top = `${rect.top + canvas.clientHeight / 2 - (SHIP_SIZE * 2)}px`;
+gameMessage.style.left = `${rect.left + canvas.clientWidth / 2}px`;
+
+gameScore.style.top = `${rect.top + 15}px`;
+gameScore.style.left = `${rect.left + canvas.clientWidth / 2}px`
+
 // set up game parameters
 let level = 1;
 let score = 0;
@@ -49,7 +57,7 @@ function newGame() {
     level = 1;
     score = 0;
     lives = GAME_LIVES;
-    gameScore.innerText = score;
+    gameScore.innerText = `Score: ${score}`;
     gameMessage.className = 'level';
     ship = newShip();
     ship.alive = true;
@@ -138,17 +146,17 @@ function destroyAsteroid(index) {
 
     // break asteroid into pieces in necessary
     if (rad === Math.ceil(ROIDS_SIZE / 2)) {
-        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 3.5) ));
-        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 3.5) ));
+        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 5) ));
+        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 5) ));
         score += ROIDS_POINTS_LARGE;
-    } else if (rad === Math.ceil(ROIDS_SIZE / 3.5)) {
-        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 6)));
-        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 6)));
+    } else if (rad === Math.ceil(ROIDS_SIZE / 5)) {
+        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 8)));
+        roids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 8)));
         score += ROIDS_POINTS_MEDIUM;
     } else {
         score += ROIDS_POINTS_SMALL;
     }
-    gameScore.innerText = score;
+    gameScore.innerText = `Score: ${score}`;
     roids.splice(index, 1);
 
     // check if level is cleared
