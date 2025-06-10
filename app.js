@@ -237,7 +237,9 @@ function gameOver() {
 
     // create subtitle blink effect
     let subTitleHidden = false;
-    setInterval( () => {
+    const intervalId = setInterval( () => {
+        if (gameMessage.className === 'level') clearInterval(intervalId); // clear interval on a new game
+        
         if (subTitleHidden) {
             subTitle.style.visibility = '';
             subTitleHidden = false;
