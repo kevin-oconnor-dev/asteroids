@@ -51,6 +51,31 @@ function positionText() {
 positionText();
 window.addEventListener('resize', positionText);
 
+// set up sound effects
+class SoundFx {
+    constructor(src, maxStreams = 1, vol = 1.0) {
+        this.streamNum = 0;
+        this.streams = [];
+        this.maxStreams = maxStreams;
+        for (let i = 0; i < maxStreams; i++) {
+            this.streams.push(new Audio(src));
+            this.streams[i].volume = vol;
+        }
+    }
+    play() {
+        this.streamNum = (this.streamNum + 1) % this.maxStreams;
+        this.streams[this.streamNum].play();
+    }
+    stop() {
+        this.streams[this.streamNum].pause();
+        this.streams[this.streamNum].currentTime = 0;
+    }
+}
+let fxLaser = new SoundFx('sounds/laser.m4a', 5, 0.25);
+let fxExplode = new SoundFx('sounds/explode.m4a', 1, 0.75);
+let fxHit = new SoundFx('sounds/hit.m4a', 5, 0.5);
+let fxThrust = new SoundFx('sounds/thrust.m4a', 1, 0.5);
+
 // set up game parameters
 let level = 1;
 let score = 0;
@@ -167,6 +192,7 @@ function destroyAsteroid(index) {
     }
     updateScore();
     roids.splice(index, 1);
+    fxHit.play();
 
     // check if level is cleared
     if (roids.length === 0) {
@@ -193,6 +219,7 @@ function shootLaser() {
             explodeTime: 0,
             active: true
         })
+        fxLaser.play();
     }
     // prevent shooting more than once per press
     ship.canShoot = false;
@@ -223,6 +250,7 @@ function drawShip(x, y, ang) {
 
 function explodeShip() {
     ship.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
+    fxExplode.play();
 }
 
 function gameOver() {
@@ -332,6 +360,7 @@ function update() {
     if (ship.thrusting && ship.alive) {
         ship.thrust.x += (SHIP_THRUST * Math.cos(ship.ang)) / FPS;
         ship.thrust.y -= (SHIP_THRUST * Math.sin(ship.ang)) / FPS;
+        fxThrust.play();
 
         // draw the thruster
             if (!exploding && blinkOn) {
@@ -361,6 +390,7 @@ function update() {
     } else {
         ship.thrust.x -= (FRICTION * ship.thrust.x) / FPS;
         ship.thrust.y -= (FRICTION * ship.thrust.y) / FPS;
+        fxThrust.stop();
     }
 
     // draw ship
