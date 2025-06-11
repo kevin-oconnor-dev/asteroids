@@ -46,7 +46,7 @@ function positionText() {
     gameScoreDisplay.style.left = `${rect.left + canvas.clientWidth / 2}px`
 
     highScoreDisplay.style.top = `${rect.top + 15}px`
-    highScoreDisplay.style.left = `${rect.right - highScoreDisplay.clientWidth}px`;
+    highScoreDisplay.style.left = `${rect.right - highScoreDisplay.clientWidth * 0.6}px`;
 }
 positionText();
 window.addEventListener('resize', positionText);
@@ -205,6 +205,7 @@ function updateScore() {
     gameScoreDisplay.innerText = `Score: ${score}`;
     highScoreDisplay.innerText = `Best: ${highScore}`;
     localStorage.setItem('highScore', String(highScore));
+    positionText();
 }
 
 function shootLaser() {
